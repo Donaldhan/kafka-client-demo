@@ -1,10 +1,15 @@
 package client.consumer;
+
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.TopicPartition;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import client.offset.OffsetManager;
+import constant.BrokerConstant;
+import util.PropertiesUtil;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -39,30 +44,51 @@ import java.util.Properties;
  * data is since they don't support atomic transactions.
  * 6) Implement idempotent as a safety net.
  * <p/>
+ *  Exactly once 每条消息肯定会被传输一次且仅传输一次，很多时候这是用户所想要的。
+ *  Exactly once  消息传输保证模式消费者客户端;
+ *  设置自动提交offset enable.auto.commit为false，将主题分区的offset信息保存在外部存储系统中，当前为
+ *  文件系统，每次保存时，重写offset。在消息处理完毕之后，将主题分区offset信息保存保存到文件系统中，
+ *  从而实现Exactly once 消息传输模式。
+ *  每次读取消息时，手动使用consumer.seek(topicPartition,offset)方法定位主题分区的offset。
  */
 public class ExactlyOnceStaticConsumer {
-    private static OffsetManager offsetManager = new OffsetManager("storage1");
+	private static final Logger log = LoggerFactory.getLogger(ExactlyOnceStaticConsumer.class);
+	private static PropertiesUtil  propertiesUtil = PropertiesUtil.getInstance();
+    private static OffsetManager offsetManager = new OffsetManager("offset-storage-static-consumer");
     public static void main(String[] str) throws InterruptedException, IOException {
-        System.out.println("Starting ManualOffsetGuaranteedExactlyOnceReadingFromSpecificPartitionConsumer ...");
+    	log.info("Starting Manual Offset Guaranteed ExactlyOnce Reading From Specific Partition Consumer ...");
         readMessages();
 
     }
+    /**
+     * 每次读取消息时，手动使用consumer.seek(topicPartition,offset)方法定位主题分区的offset
+     * @throws InterruptedException
+     * @throws IOException
+     */
     private static void readMessages() throws InterruptedException, IOException {
         KafkaConsumer<String, String> consumer = createConsumer();
-        String topic = "normal-topic";
+        String topic = propertiesUtil.getProperty(BrokerConstant.TOPIC_NAME);
         int partition = 1;
         TopicPartition topicPartition = registerConsumerToSpecificPartition(consumer, topic, partition);
         // Read the offset for the topic and partition from external storage.
+        //从文件中，读取topic分区的offset
         long offset = offsetManager.readOffsetFromExternalStore(topic, partition);
         // Use seek and go to exact offset for that topic and partition.
-        consumer.seek(topicPartition, offset);
+        consumer.seek(topicPartition, offset);//定位主题分区的offset
         processRecords(consumer);
 
     }
+    /**
+     * 设置自动提交offset enable.auto.commit为false，将主题分区的offset信息保存在外部存储系统中，当前为
+     * 文件系统，每次保存时，重写offset。在消息处理完毕之后，将主题分区offset信息保存保存到文件系统中，
+     * 从而实现Exactly once 消息传输模式
+     * @return
+     */
     private static KafkaConsumer<String, String> createConsumer() {
         Properties props = new Properties();
-        props.put("bootstrap.servers", "localhost:9092");
-        String consumeGroup = "cg2";
+        String bootstrapServers = propertiesUtil.getProperty(BrokerConstant.BOOTSTRAP_SERVERS);
+        props.put("bootstrap.servers", bootstrapServers);
+        String consumeGroup =  propertiesUtil.getProperty(BrokerConstant.AT_MOST_LEAST_ONCE_GROUP);
         props.put("group.id", consumeGroup);
         // Below is a key setting to turn off the auto commit.
         props.put("enable.auto.commit", "false");
@@ -90,9 +116,10 @@ public class ExactlyOnceStaticConsumer {
      */
     private static void processRecords(KafkaConsumer<String, String> consumer) throws IOException {
         while (true) {
-            ConsumerRecords<String, String> records = consumer.poll(100);
+            ConsumerRecords<String, String> records = consumer.poll(100);//从主体poll 100个消息
             for (ConsumerRecord<String, String> record : records) {
-                System.out.printf("offset = %d, key = %s, value = %s\n", record.offset(), record.key(), record.value());
+                log.info("offset = {}, key = {}, value = {}\n", record.offset(), record.key(), record.value());
+                //将分区的offset标志存放到消息所在的topic 分区对应的文件中
                 offsetManager.saveOffsetInExternalStore(record.topic(), record.partition(), record.offset());
 
             }

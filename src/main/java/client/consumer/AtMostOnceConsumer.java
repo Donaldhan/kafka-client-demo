@@ -45,13 +45,17 @@ import java.util.Properties;
  * </ol>
  * <p/>
  * </ol>
+ * At most once 消息可能会丢，但绝不会重复传输;
+ * At-most-once 消息传输保证模式消费者客户端;
+ * KafkaConsumer消费者客户端主要通过设置enable.auto.commit为true，同时在
+ * auto.commit.interval.ms时间间隔后提交offset，从而实现At-most-once 消息传输保证模式。
  */
 public class AtMostOnceConsumer {
 	private static final Logger log = LoggerFactory.getLogger(AtMostOnceConsumer.class);
 	private static PropertiesUtil  propertiesUtil = PropertiesUtil.getInstance();
 	
     public static void main(String[] str) throws InterruptedException {
-    	log.info("Starting AutoOffsetMostlyAtleastOnceButSometimeAtMostOnceConsumer ...");
+    	log.info("Starting Auto Offset Mostly AtleastOnce But Sometime AtMostOnce Consumer ...");
         execute();
 
     }
@@ -69,13 +73,15 @@ public class AtMostOnceConsumer {
     }
 
     /**
+     * KafkaConsumer消费者客户端主要通过设置enable.auto.commit为true，同时在
+     * auto.commit.interval.ms时间间隔后提交offset，从而实现At-most-once 消息传输保证模式
      * @return
      */
     private static KafkaConsumer<String, String> createConsumer() {
         Properties props = new Properties();
         String bootstrapServers = propertiesUtil.getProperty(BrokerConstant.BOOTSTRAP_SERVERS);
-        props.put(BrokerConstant.BOOTSTRAP_SERVERS, bootstrapServers);
-        String consumeGroup = "cg1";
+        props.put("bootstrap.servers", bootstrapServers);
+        String consumeGroup = propertiesUtil.getProperty(BrokerConstant.AT_MOST_LEAST_ONCE_GROUP);
         props.put("group.id", consumeGroup);
         // Set this property, if auto commit should happen.
         props.put("enable.auto.commit", "true");
@@ -88,9 +94,9 @@ public class AtMostOnceConsumer {
         props.put("heartbeat.interval.ms", "3000");
         props.put("session.timeout.ms", "6001");
         String keyDeserializer = propertiesUtil.getProperty(BrokerConstant.KEY_DESERIALIZER);
-        props.put(BrokerConstant.KEY_DESERIALIZER, keyDeserializer);
+        props.put("key.deserializer", keyDeserializer);
         String valueDeserializer = propertiesUtil.getProperty(BrokerConstant.VALUE_DESERIALIZER);
-        props.put(BrokerConstant.VALUE_DESERIALIZER, valueDeserializer);
+        props.put("value.deserializer", valueDeserializer);
         return new KafkaConsumer<String, String>(props);
     }
     /**

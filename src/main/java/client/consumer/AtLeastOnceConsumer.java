@@ -1,7 +1,13 @@
 package client.consumer;
+
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import constant.BrokerConstant;
+import util.PropertiesUtil;
 
 import java.util.Arrays;
 import java.util.Properties;
@@ -17,10 +23,17 @@ import java.util.Properties;
  * using some record key or hash during the scenario when message are processed twice.
  * <p/>
  * <p/>
+ * At least one 消息绝不会丢，但可能会重复传输;
+ * At-least-once 消息传输保证模式消费者客户端;
+ * KafkaConsumer消费者客户端主要通过设置enable.auto.commit为true，同时设置
+ * auto.commit.interval.ms时间为尽可能的大，在每次处理消息完，通过consumer.commitSync()方法，提交offset，
+ * 从而实现at-least-once 消息传输保证模式
  */
 public class AtLeastOnceConsumer {
+	private static final Logger log = LoggerFactory.getLogger(AtLeastOnceConsumer.class);
+	private static PropertiesUtil  propertiesUtil = PropertiesUtil.getInstance();
     public static void main(String[] str) throws InterruptedException {
-        System.out.println("Starting AutoOffsetGuranteedAtLeastOnceConsumer ...");
+    	log.info("Starting AutoOff set Guranteed AtLeastOnce Consumer ...");
         execute();
     }
     /**
@@ -28,19 +41,24 @@ public class AtLeastOnceConsumer {
      */
     private static void execute() throws InterruptedException {
         KafkaConsumer<String, String> consumer = createConsumer();
+        String topic = propertiesUtil.getProperty(BrokerConstant.TOPIC_NAME);
         // Subscribe to all partition in that topic. 'assign' could be used here
         // instead of 'subscribe' to subscribe to specific partition.
-        consumer.subscribe(Arrays.asList("normal-topic"));
+        consumer.subscribe(Arrays.asList(topic));
         processRecords(consumer);
 
     }
     /**
+     * KafkaConsumer消费者客户端主要通过设置enable.auto.commit为true，同时设置
+     * auto.commit.interval.ms时间为尽可能的大，在每次处理消息完，通过consumer.commitSync()方法，提交offset，
+     * 从而实现at-least-once 消息传输保证模式
      * @return
      */
     private static KafkaConsumer<String, String> createConsumer() {
         Properties props = new Properties();
-        props.put("bootstrap.servers", "localhost:9092");
-        String consumeGroup = "cg1";
+        String bootstrapServers = propertiesUtil.getProperty(BrokerConstant.BOOTSTRAP_SERVERS);
+        props.put("bootstrap.servers", bootstrapServers);
+        String consumeGroup = propertiesUtil.getProperty(BrokerConstant.AT_MOST_LEAST_ONCE_GROUP);
         props.put("group.id", consumeGroup);
         // Set this property, if auto commit should happen.
         props.put("enable.auto.commit", "true");
@@ -64,10 +82,10 @@ public class AtLeastOnceConsumer {
             ConsumerRecords<String, String> records = consumer.poll(100);
             long lastOffset = 0;
             for (ConsumerRecord<String, String> record : records) {
-                System.out.printf("\n\roffset = %d, key = %s, value = %s", record.offset(), record.key(), record.value());
+            	log.info("\n\roffset = {}, key = {}, value = {}", record.offset(), record.key(), record.value());
                 lastOffset = record.offset();
             }
-            System.out.println("lastOffset read: " + lastOffset);
+            log.info("lastOffset read:{} " ,lastOffset);
             process();
             // Below call is important to control the offset commit. Do this call after you
             // finish processing the business process to get the at least once guarantee.
@@ -81,6 +99,4 @@ public class AtLeastOnceConsumer {
         // create some delay to simulate processing of the record.
         Thread.sleep(500);
     }
-
-
 }

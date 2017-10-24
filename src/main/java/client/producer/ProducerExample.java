@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.util.Properties;
 /**
  * A sample client to produce a bunch of messages.
+ * 消息生产者
  */
 public class ProducerExample {
 	private static final Logger log = LoggerFactory.getLogger(ProducerExample.class);
@@ -40,16 +41,16 @@ public class ProducerExample {
 	private static Producer<String, String> createProducer() {
         Properties props = new Properties();
         String bootstrapServers = propertiesUtil.getProperty(BrokerConstant.BOOTSTRAP_SERVERS);
-        props.put(BrokerConstant.BOOTSTRAP_SERVERS, bootstrapServers);//localhost:9092
+        props.put("bootstrap.servers", bootstrapServers);//localhost:9092
         props.put("acks", "all");
         props.put("retries", 0);
         // This property controls how much bytes the sender would wait to batch up the content before publishing to Kafka.
         props.put("batch.size", 10);
         props.put("linger.ms", 1);
         String keySerializer = propertiesUtil.getProperty(BrokerConstant.KEY_SERIALIZER);
-        props.put(BrokerConstant.KEY_SERIALIZER, keySerializer);
+        props.put("key.serializer", keySerializer);
         String valueSerializer = propertiesUtil.getProperty(BrokerConstant.VALUE_SERIALIZER);
-        props.put(BrokerConstant.VALUE_SERIALIZER, valueSerializer);
+        props.put("value.serializer", valueSerializer);
         return new KafkaProducer(props);
     }
 
