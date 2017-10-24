@@ -39,5 +39,9 @@ public class BrokerConstant {
 	 * Exactly Once kafka  delivery guarantee mode group
 	 */
 	public static final String EXACTLYONCE_GROUP = "exactlyOnce.group";
+	/**
+	 * avro topic name
+	 */
+	public static final String AVRO_TOPIC = "avroTopic";
 	
 }
