@@ -1,7 +1,13 @@
 package client.consumer;
+
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import constant.BrokerConstant;
+import util.PropertiesUtil;
 
 import java.util.Arrays;
 import java.util.Properties;
@@ -41,8 +47,11 @@ import java.util.Properties;
  * </ol>
  */
 public class AtMostOnceConsumer {
+	private static final Logger log = LoggerFactory.getLogger(AtMostOnceConsumer.class);
+	private static PropertiesUtil  propertiesUtil = PropertiesUtil.getInstance();
+	
     public static void main(String[] str) throws InterruptedException {
-        System.out.println("Starting AutoOffsetMostlyAtleastOnceButSometimeAtMostOnceConsumer ...");
+    	log.info("Starting AutoOffsetMostlyAtleastOnceButSometimeAtMostOnceConsumer ...");
         execute();
 
     }
@@ -52,9 +61,10 @@ public class AtMostOnceConsumer {
      */
     private static void execute() throws InterruptedException {
         KafkaConsumer<String, String> consumer = createConsumer();
+        String topic = propertiesUtil.getProperty(BrokerConstant.TOPIC_NAME);
         // Subscribe to all partition in that topic. 'assign' could be used here
         // instead of 'subscribe' to subscribe to specific partition.
-        consumer.subscribe(Arrays.asList("normal-topic"));
+        consumer.subscribe(Arrays.asList(topic));
         processRecords(consumer);
     }
 
@@ -63,7 +73,8 @@ public class AtMostOnceConsumer {
      */
     private static KafkaConsumer<String, String> createConsumer() {
         Properties props = new Properties();
-        props.put("bootstrap.servers", "localhost:9092");
+        String bootstrapServers = propertiesUtil.getProperty(BrokerConstant.BOOTSTRAP_SERVERS);
+        props.put(BrokerConstant.BOOTSTRAP_SERVERS, bootstrapServers);
         String consumeGroup = "cg1";
         props.put("group.id", consumeGroup);
         // Set this property, if auto commit should happen.
@@ -76,25 +87,33 @@ public class AtMostOnceConsumer {
         //        props.put("auto.offset.reset", "earliest");
         props.put("heartbeat.interval.ms", "3000");
         props.put("session.timeout.ms", "6001");
-        props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-        props.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+        String keyDeserializer = propertiesUtil.getProperty(BrokerConstant.KEY_DESERIALIZER);
+        props.put(BrokerConstant.KEY_DESERIALIZER, keyDeserializer);
+        String valueDeserializer = propertiesUtil.getProperty(BrokerConstant.VALUE_DESERIALIZER);
+        props.put(BrokerConstant.VALUE_DESERIALIZER, valueDeserializer);
         return new KafkaConsumer<String, String>(props);
     }
+    /**
+     * @param consumer
+     * @throws InterruptedException
+     */
     private static void processRecords(KafkaConsumer<String, String> consumer) throws InterruptedException {
         while (true) {
             ConsumerRecords<String, String> records = consumer.poll(100);
             long lastOffset = 0;
             for (ConsumerRecord<String, String> record : records) {
-                System.out.printf("\n\roffset = %d, key = %s, value = %s", record.offset(), record.key(), record.value());
+                log.info("\n\roffset = {}, key = {}, value = {}", record.offset(), record.key(), record.value());
                 lastOffset = record.offset();
             }
-            System.out.println("lastOffset read: " + lastOffset);
+            log.info("lastOffset read: {}",lastOffset);
             process();
         }
     }
+    /**
+     * @throws InterruptedException
+     */
     private static void process() throws InterruptedException {
         // create some delay to simulate processing of the record.
         Thread.sleep(500);
     }
-
 }

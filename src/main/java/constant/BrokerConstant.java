@@ -1,0 +1,36 @@
+package constant;
+
+/**
+ * broker configuration constant
+ * @author donald
+ * 2017年10月24日
+ * 上午8:31:51
+ */
+public class BrokerConstant {
+	/**
+	 * broker 地址
+	 */
+	public static final String BOOTSTRAP_SERVERS = "bootstrap.servers";
+	
+	/**
+	 * key序列化类
+	 */
+	public static final String KEY_SERIALIZER = "key.serializer";
+	/**
+	 * value序列化类
+	 */
+	public static final String VALUE_SERIALIZER = "value.serializer";
+	
+	/**
+	 * 主题名
+	 */
+	public static final String TOPIC_NAME = "topic";
+	/**
+	 * key反序列化类
+	 */
+	public static final String KEY_DESERIALIZER = "key.deserializer";
+	/**
+	 * value反序列化类
+	 */
+	public static final String VALUE_DESERIALIZER = "key.deserializer";
+}
