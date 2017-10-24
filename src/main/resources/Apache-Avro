@@ -1,0 +1,47 @@
+Apache Avro:http://avro.apache.org/
+Apache Avro 与 Thrift 比较:http://blog.csdn.net/sony315/article/details/6887678
+使用Apache Avro:http://book.51cto.com/art/201408/447944.htm
+Apache Avro使用入门指南:https://www.iteblog.com/archives/1008.html
+Apache Avro入门:http://blog.csdn.net/zhu_tianwei/article/details/44042691
+使用Apache Avro:http://www.infoq.com/cn/articles/ApacheAvro
+#######################################################################
+Apache Avro 与 Thrift 比较
+
+Avro和Thrift都是跨语言，基于二进制的高性能的通讯中间件. 它们都提供了数据序列化的功能和RPC服务. 
+总体功能上类似，但是哲学不一样. Thrift出自Facebook用于后台各个服务间的通讯,Thrift的设计强调统
+一的编程接口的多语言通讯框架. Avro出自Hadoop之父Doug Cutting, 在Thrift已经相当流行的情况下Avro的推出，
+其目标不仅是提供一套类似Thrift的通讯中间件更是要建立一个新的，标准性的云计算的数据交换和存储的Protocol。
+ 这个和Thrift的理念不同，Thrift认为没有一个完美的方案可以解决所有问题，因此尽量保持一个Neutral框架，
+ 插入不同的实现并互相交互。而Avro偏向实用，排斥多种方案带来的 可能的混乱，主张建立一个统一的标准，
+ 并不介意采用特定的优化。Avro的创新之处在于融合了显式,declarative的Schema和高效二进制的数据表达，
+ 强调数据的自我描述，克服了以往单纯XML或二进制系统的缺陷。Avro对Schema动态加载功能，
+ 是Thrift编程接口所不具备的，符合了Hadoop上的Hive/Pig及NOSQL 等既属于ad hoc，又追求性能的应用需求.
+ 
+ ##########################################################################
+ Apache Avro
+ Avro是Hadoop中的一个子项目，也是Apache中一个独立的项目，Avro是一个基于二进制数据传输高性能的中间件。
+ 在Hadoop的其他项目中例如HBase(Ref)和Hive(Ref)的Client端与服务端的数据传输也采用了这个工具，Avro可以做到将数据进行序列化，
+ 适用于远程或本地大批量数据交互。在传输的过程中Avro对数据二进制序列化后节约数据存储空间和网络传输带宽。做个比方：有一个100平方的房子，
+ 本来能放100件东西，现在期望借助某种手段能让原有面积的房子能存放比原来多150件以上或者更多的东西，就好比数据存放在缓存中，缓存是精贵的，
+ 需要充分的利用缓存有限的空间，存放更多的数据。再例如网络带宽的资源是有限的，希望原有的带宽范围能传输比原来高大的数据量流量，
+ 特别是针对结构化的数据传输和存储，这就是Avro存在的意义和价值。Avro还可以做到在同一系统中支持多种不同语言，也有点类似Apache的另一个产品：
+Thrift(Ref)，对于Thrift不同的是Avro更加具有灵活性，Avro可以支持对定义的数据结构(Schema)动态加载，利于系统扩展。
+使用Avro可以通过2中方式来实现：
+1.二进制编码，Avro-specific方式依赖代码(文件)生成特定类，并内嵌JSON Schema；
+2.JSON编码，Avro-generic方式通过JSON文件动态加载Schema，不需要编译加载直接就可以处理新的数据源。
+我肤浅的认为，两者的区别在于同样的数据大小，在二进制编码下所产生的Avro数据的大小为100个字节，而在JSON编码下产生了450个字节。
+虽然看起来第1种二进制编码的方式占据一定优势，但是二进制传输最大的问题就是出了 bug 不方便追查，而JSON编码的方式更实用于系统与系统之间的数据通讯。
+Avro支持本地和远程RPC(Ref)调用,RPC远程调用又分为Http和Netty2种，在这里主要介绍基于Http协议的Avro远程调用，首先需要定义一个JSON文件作为双方通信的传输协议规范，
+便于解析从对方发送过来的数据。
+在这个协议中可以看做分为3大部分：
+    1.描述(Protocol Declaration)，定义命名空间，协议名称 等。
+    2.数据类型(types)，根据规范中的Primitive和Complex Types数据类型，自己封装一套数据格式。
+    3.消息(messages)，根据自己定义的数据类型，再去定义 a)请求、b)回应、c)异常(可选)  数据格式。
+特点：
+1.丰富的数据结构类型
+2.快速可压缩的二进制数据形式
+3.存储持久数据的文件容器
+4.远程过程调用（RPC）
+5.同动态语言的简单集成。读写数据文件和使用RPC协议都不需要生成代码，而代码生成作为一种可选的优化只值得在静态类型语言中实现。
+由于性能高、基本代码少和产出数据量精简等特点，Avro周围展开了众多活动——许多NoSQL实现，包括Hadoop、Cssandra等，
+都把Avro整合到它们的客户端API和储存功能中。Avro有C, C++, C#, Java, PHP, Python, and Ruby等语言的实现，下面我们以一个实例来说明Avro序列化和反序列化数据。

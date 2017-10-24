@@ -32,9 +32,10 @@ public class AvroConsumerExample {
      */
     private static void readMessages() throws InterruptedException {
         KafkaConsumer<String, byte[]> consumer = createConsumer();
+        String topic = propertiesUtil.getProperty(BrokerConstant.AVRO_TOPIC);
+        log.info("AvroConsumerExample topic name:{}",topic);
         // Assign to specific topic and partition, subscribe could be used here to subscribe to all topic.
-        consumer.assign(Arrays.asList(new TopicPartition("avro-topic", 0)));
-
+        consumer.assign(Arrays.asList(new TopicPartition(topic, 0)));
         processRecords(consumer);
     }
 
@@ -47,7 +48,6 @@ public class AvroConsumerExample {
             ConsumerRecords<String, byte[]> records = consumer.poll(100);
             long lastOffset = 0;
             for (ConsumerRecord<String, byte[]> record : records) {
-
                 GenericRecord genericRecord = AvroSupport.byteArrayToData(AvroSupport.getSchema(), record.value());
                 String firstName = AvroSupport.getValue(genericRecord, "firstName", String.class);
                 log.info("\n\roffset = {}, key = {}, value = {}", record.offset(), record.key(), firstName);

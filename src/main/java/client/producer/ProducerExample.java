@@ -30,7 +30,7 @@ public class ProducerExample {
         Producer<String, String> producer = createProducer();
         sendMessages(producer);
         // Allow the producer to complete the sending of the records before existing the program.
-        Thread.sleep(1000);
+        Thread.sleep(60000);
 
     }
 
@@ -45,7 +45,7 @@ public class ProducerExample {
         props.put("acks", "all");
         props.put("retries", 0);
         // This property controls how much bytes the sender would wait to batch up the content before publishing to Kafka.
-        props.put("batch.size", 10);
+        props.put("batch.size", 5);
         props.put("linger.ms", 1);
         String keySerializer = propertiesUtil.getProperty(BrokerConstant.KEY_SERIALIZER);
         props.put("key.serializer", keySerializer);
@@ -60,6 +60,7 @@ public class ProducerExample {
      */
     private static void sendMessages(Producer<String, String> producer) {
         String topic = propertiesUtil.getProperty(BrokerConstant.TOPIC_NAME);
+        log.info("producer topic name:{}",topic);
         int partition = 0;
         long record = 1;
         for (int i = 1; i <= 10; i++) {
@@ -67,7 +68,7 @@ public class ProducerExample {
         	ProducerRecord<String, String> message = new ProducerRecord<String, String>(topic, partition, Long.toString(record), Long.toString(record++));
             producer.send(message);
         }
-        log.info("send message ended...");
+        log.info("send message ended ...");
     }
 
 

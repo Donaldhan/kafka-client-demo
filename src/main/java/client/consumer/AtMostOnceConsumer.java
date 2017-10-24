@@ -66,6 +66,7 @@ public class AtMostOnceConsumer {
     private static void execute() throws InterruptedException {
         KafkaConsumer<String, String> consumer = createConsumer();
         String topic = propertiesUtil.getProperty(BrokerConstant.TOPIC_NAME);
+        log.info("AtMostOnceConsumer topic name:{}",topic);
         // Subscribe to all partition in that topic. 'assign' could be used here
         // instead of 'subscribe' to subscribe to specific partition.
         consumer.subscribe(Arrays.asList(topic));

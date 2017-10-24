@@ -66,6 +66,7 @@ public class ExactlyOnceDynamicConsumer {
     private static void readMessages() throws InterruptedException {
         KafkaConsumer<String, String> consumer = createConsumer();
         String topic = propertiesUtil.getProperty(BrokerConstant.TOPIC_NAME);
+        log.info("ExactlyOnceDynamicConsumer topic name:{}",topic);
         // Manually controlling offset but register consumer to topics to get dynamically assigned partitions.
         // Inside MyConsumerRebalancerListener use consumer.seek(topicPartition,offset) to control offset
         consumer.subscribe(Arrays.asList(topic), new MyConsumerRebalancerListener(consumer,offsetManager));

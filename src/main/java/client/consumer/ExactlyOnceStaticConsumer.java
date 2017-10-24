@@ -68,6 +68,7 @@ public class ExactlyOnceStaticConsumer {
     private static void readMessages() throws InterruptedException, IOException {
         KafkaConsumer<String, String> consumer = createConsumer();
         String topic = propertiesUtil.getProperty(BrokerConstant.TOPIC_NAME);
+        log.info("ExactlyOnceStaticConsumer topic name:{}",topic);
         int partition = 1;
         TopicPartition topicPartition = registerConsumerToSpecificPartition(consumer, topic, partition);
         // Read the offset for the topic and partition from external storage.
@@ -109,7 +110,6 @@ public class ExactlyOnceStaticConsumer {
         List<TopicPartition> partitions = Arrays.asList(topicPartition);
         consumer.assign(partitions);
         return topicPartition;
-
     }
     /**
      * Process data and store offset in external store. Best practice is to do these operations atomically. Read class level comments.

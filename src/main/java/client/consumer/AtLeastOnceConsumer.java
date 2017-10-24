@@ -42,6 +42,7 @@ public class AtLeastOnceConsumer {
     private static void execute() throws InterruptedException {
         KafkaConsumer<String, String> consumer = createConsumer();
         String topic = propertiesUtil.getProperty(BrokerConstant.TOPIC_NAME);
+        log.info("AtLeastOnceConsumer topic name:{}",topic);
         // Subscribe to all partition in that topic. 'assign' could be used here
         // instead of 'subscribe' to subscribe to specific partition.
         consumer.subscribe(Arrays.asList(topic));
@@ -64,7 +65,7 @@ public class AtLeastOnceConsumer {
         props.put("enable.auto.commit", "true");
         // Make Auto commit interval to a big number so that auto commit does not happen,
         // we are going to control the offset commit via consumer.commitSync(); after processing record.
-        props.put("auto.commit.interval.ms", "999999999999");
+        props.put("auto.commit.interval.ms", "999999999");
         // This is how to control number of records being read in each poll
         props.put("max.partition.fetch.bytes", "135");
         props.put("heartbeat.interval.ms", "3000");

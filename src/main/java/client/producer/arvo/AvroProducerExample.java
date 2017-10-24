@@ -58,7 +58,8 @@ public class AvroProducerExample {
      * @throws InterruptedException
      */
     private static void sendRecords(Producer<String, byte[]> producer) throws IOException, InterruptedException {
-        String topic = "avro-topic";
+    	String topic = propertiesUtil.getProperty(BrokerConstant.AVRO_TOPIC);
+    	log.info("AvroProducerExample topic name:{}",topic);
         int partition = 0;
         while (true) {
             for (int i = 1; i < 100; i++)
@@ -72,6 +73,7 @@ public class AvroProducerExample {
 
 
     /**
+     * 使用arvo，将name String转换成字节数组
      * @param name
      * @return
      * @throws IOException

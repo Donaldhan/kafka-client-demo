@@ -14,10 +14,16 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 /**
+ * about Apache avro, see#:
+ * https://github.com/apache/avro
+ * http://blog.csdn.net/zhu_tianwei/article/details/44042691
+ * https://cwiki.apache.org/confluence/display/AVRO/How+To+Contribute
+ * and You can see#src/main/resource/Apache-avro to realized the avro
  * Support class for avro messages.
  */
 public class AvroSupport {
     /**
+     * Schema
      * @return
      */
     public static Schema getSchema() {
@@ -31,6 +37,7 @@ public class AvroSupport {
         return new Schema.Parser().parse(schemaStr);
     }
     /**
+     * 转换record为字节数组
      * @param schema
      * @param datum
      * @return
@@ -50,6 +57,7 @@ public class AvroSupport {
         }
     }
     /**
+     * 转换字节数组为record
      * @param schema
      * @param byteData
      * @return
@@ -72,6 +80,7 @@ public class AvroSupport {
         }
     }
     /**
+     * 从record中获取name属性对应的值
      * @param genericRecord
      * @param name
      * @param clazz
