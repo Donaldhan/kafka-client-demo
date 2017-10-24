@@ -25,8 +25,8 @@ import java.util.Properties;
  * <p/>
  * At least one 消息绝不会丢，但可能会重复传输;
  * At-least-once 消息传输保证模式消费者客户端;
- * KafkaConsumer消费者客户端主要通过设置enable.auto.commit为true，同时设置
- * auto.commit.interval.ms时间为尽可能的大，在每次处理消息完，通过consumer.commitSync()方法，提交offset，
+ * KafkaConsumer消费者客户端主要通过设置enable.auto.commit为false，
+ * 在每次处理消息完，通过consumer.commitSync()方法，提交offset，
  * 从而实现at-least-once 消息传输保证模式
  */
 public class AtLeastOnceConsumer {
@@ -50,9 +50,9 @@ public class AtLeastOnceConsumer {
 
     }
     /**
-     * KafkaConsumer消费者客户端主要通过设置enable.auto.commit为true，同时设置
-     * auto.commit.interval.ms时间为尽可能的大，在每次处理消息完，通过consumer.commitSync()方法，提交offset，
-     * 从而实现at-least-once 消息传输保证模式
+     * KafkaConsumer消费者客户端主要通过设置enable.auto.commit为false，
+     * 在每次处理消息完，通过consumer.commitSync()方法，提交offset，
+     * 从而实现at-least-once 消息传输保证模式。
      * @return
      */
     private static KafkaConsumer<String, String> createConsumer() {
@@ -62,10 +62,8 @@ public class AtLeastOnceConsumer {
         String consumeGroup = propertiesUtil.getProperty(BrokerConstant.AT_MOST_LEAST_ONCE_GROUP);
         props.put("group.id", consumeGroup);
         // Set this property, if auto commit should happen.
-        props.put("enable.auto.commit", "true");
-        // Make Auto commit interval to a big number so that auto commit does not happen,
         // we are going to control the offset commit via consumer.commitSync(); after processing record.
-        props.put("auto.commit.interval.ms", "999999999");
+        props.put("enable.auto.commit", "false");
         // This is how to control number of records being read in each poll
         props.put("max.partition.fetch.bytes", "135");
         props.put("heartbeat.interval.ms", "3000");

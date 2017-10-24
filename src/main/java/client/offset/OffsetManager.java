@@ -50,7 +50,6 @@ public class OffsetManager {
 		try {
 			Stream<String> stream = Files.lines(Paths.get(storageName(topic, partition)));
 			return Long.parseLong(stream.collect(Collectors.toList()).get(0)) + 1;
-
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

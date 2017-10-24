@@ -69,7 +69,10 @@ public class ExactlyOnceStaticConsumer {
         KafkaConsumer<String, String> consumer = createConsumer();
         String topic = propertiesUtil.getProperty(BrokerConstant.TOPIC_NAME);
         log.info("ExactlyOnceStaticConsumer topic name:{}",topic);
-        int partition = 1;
+        /*from the first partition consumer message,
+         * if this partition no message can change another one,such as 1,2...
+         */
+        int partition = 0;
         TopicPartition topicPartition = registerConsumerToSpecificPartition(consumer, topic, partition);
         // Read the offset for the topic and partition from external storage.
         //从文件中，读取topic分区的offset
@@ -115,6 +118,7 @@ public class ExactlyOnceStaticConsumer {
      * Process data and store offset in external store. Best practice is to do these operations atomically. Read class level comments.
      */
     private static void processRecords(KafkaConsumer<String, String> consumer) throws IOException {
+    	log.info("start process records ....");
         while (true) {
             ConsumerRecords<String, String> records = consumer.poll(100);//从主体poll 100个消息
             for (ConsumerRecord<String, String> record : records) {

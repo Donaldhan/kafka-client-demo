@@ -68,6 +68,7 @@ public class ProducerExample {
         	ProducerRecord<String, String> message = new ProducerRecord<String, String>(topic, partition, Long.toString(record), Long.toString(record++));
             producer.send(message);
         }
+//        producer.flush();
         log.info("send message ended ...");
     }
 

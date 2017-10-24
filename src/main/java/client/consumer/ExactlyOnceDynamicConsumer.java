@@ -98,6 +98,7 @@ public class ExactlyOnceDynamicConsumer {
      * @param consumer
      */
     private static void processRecords(KafkaConsumer<String, String> consumer) {
+    	log.info("start process records ....");
         while (true) {
             ConsumerRecords<String, String> records = consumer.poll(100);
             for (ConsumerRecord<String, String> record : records) {
