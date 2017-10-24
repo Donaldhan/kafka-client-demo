@@ -53,6 +53,7 @@ public class ExactlyOnceDynamicConsumer {
 	private static final Logger log = LoggerFactory.getLogger(ExactlyOnceDynamicConsumer.class);
 	private static PropertiesUtil  propertiesUtil = PropertiesUtil.getInstance();
     private static OffsetManager offsetManager = new OffsetManager("offset-storage-dynamic-consumer");
+    private static final String CONSUME_GROUP = "exactlyOnceDynamicConsumerGroup";
     public static void main(String[] str) throws InterruptedException {
     	log.info("Starting Manual Offset Guaranteed Exactly Once Reading Dynamically Balanced Partition Consumer ...");
         readMessages();
@@ -80,8 +81,7 @@ public class ExactlyOnceDynamicConsumer {
         Properties props = new Properties();
         String bootstrapServers = propertiesUtil.getProperty(BrokerConstant.BOOTSTRAP_SERVERS);
         props.put("bootstrap.servers", bootstrapServers);
-        String consumeGroup = "cg3";
-        props.put("group.id", consumeGroup);
+        props.put("group.id", CONSUME_GROUP);
         // Below is a key setting to turn off the auto commit.
         props.put("enable.auto.commit", "false");
         props.put("heartbeat.interval.ms", "2000");

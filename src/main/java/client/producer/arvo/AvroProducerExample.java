@@ -1,11 +1,16 @@
 package client.producer.arvo;
+
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import client.avro.AvroSupport;
+import constant.BrokerConstant;
+import util.PropertiesUtil;
 
 import java.io.IOException;
 import java.util.Properties;
@@ -14,9 +19,10 @@ import java.util.Properties;
  * Create and publish an avro type message.
  */
 public class AvroProducerExample {
-	
+	private static final Logger log = LoggerFactory.getLogger(AvroProducerExample.class);
+	private static PropertiesUtil  propertiesUtil = PropertiesUtil.getInstance();
     public static void main(String[] str) throws InterruptedException, IOException {
-        System.out.println("Starting ProducerAvroExample ...");
+    	log.info("Starting ProducerAvroExample ...");
         sendMessages();
     }
 
@@ -35,7 +41,8 @@ public class AvroProducerExample {
     @SuppressWarnings({ "rawtypes", "unchecked" })
 	private static Producer<String, byte[]> createProducer() {
         Properties props = new Properties();
-        props.put("bootstrap.servers", "localhost:9092");
+        String bootstrapServers = propertiesUtil.getProperty(BrokerConstant.BOOTSTRAP_SERVERS);
+        props.put("bootstrap.servers", bootstrapServers);//localhost:9092
         props.put("acks", "all");
         props.put("retries", 0);
         props.put("batch.size", 16384);
@@ -55,7 +62,10 @@ public class AvroProducerExample {
         int partition = 0;
         while (true) {
             for (int i = 1; i < 100; i++)
-                producer.send(new ProducerRecord<String, byte[]>(topic, partition, Integer.toString(0), record(i + "")));
+            {
+            	 ProducerRecord<String, byte[]> message = new ProducerRecord<String, byte[]>(topic, partition, Integer.toString(0), record(i + ""));
+            	 producer.send(message);
+            }
             Thread.sleep(500);
         }
     }

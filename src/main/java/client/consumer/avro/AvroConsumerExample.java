@@ -1,11 +1,17 @@
 package client.consumer.avro;
+
 import org.apache.avro.generic.GenericRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.TopicPartition;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import client.avro.AvroSupport;
+import client.producer.arvo.AvroProducerExample;
+import constant.BrokerConstant;
+import util.PropertiesUtil;
 
 import java.util.Arrays;
 import java.util.Properties;
@@ -14,9 +20,10 @@ import java.util.Properties;
  * Reads an avro message.
  */
 public class AvroConsumerExample {
-
+	private static final Logger log = LoggerFactory.getLogger(AvroProducerExample.class);
+	private static PropertiesUtil  propertiesUtil = PropertiesUtil.getInstance();
     public static void main(String[] str) throws InterruptedException {
-        System.out.println("Starting AutoOffsetAvroConsumerExample ...");
+    	log.info("Starting Auto Offset AvroConsumerExample ...");
         readMessages();
     }
 
@@ -43,10 +50,10 @@ public class AvroConsumerExample {
 
                 GenericRecord genericRecord = AvroSupport.byteArrayToData(AvroSupport.getSchema(), record.value());
                 String firstName = AvroSupport.getValue(genericRecord, "firstName", String.class);
-                System.out.printf("\n\roffset = %d, key = %s, value = %s", record.offset(), record.key(), firstName);
+                log.info("\n\roffset = {}, key = {}, value = {}", record.offset(), record.key(), firstName);
                 lastOffset = record.offset();
             }
-            System.out.println("lastOffset read: " + lastOffset);
+            log.info("lastOffset read: " + lastOffset);
             consumer.commitSync();
             Thread.sleep(500);
 
@@ -57,8 +64,9 @@ public class AvroConsumerExample {
      */
     private static KafkaConsumer<String, byte[]> createConsumer() {
         Properties props = new Properties();
-        props.put("bootstrap.servers", "localhost:9092");
-        String consumeGroup = "cg1";
+        String bootstrapServers = propertiesUtil.getProperty(BrokerConstant.BOOTSTRAP_SERVERS);
+        props.put("bootstrap.servers", bootstrapServers);//localhost:9092
+        String consumeGroup = propertiesUtil.getProperty(BrokerConstant.AT_MOST_LEAST_ONCE_GROUP);
         props.put("group.id", consumeGroup);
         props.put("enable.auto.commit", "true");
         props.put("auto.offset.reset", "earliest");
