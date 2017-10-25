@@ -62,11 +62,13 @@ public class AvroProducerExample {
     	log.info("AvroProducerExample topic name:{}",topic);
         int partition = 0;
         while (true) {
-            for (int i = 1; i < 100; i++)
+        	log.info("send 100 message start ...");
+            for (int i = 1; i <= 100; i++)
             {
-            	 ProducerRecord<String, byte[]> message = new ProducerRecord<String, byte[]>(topic, partition, Integer.toString(0), record(i + ""));
+            	 ProducerRecord<String, byte[]> message = new ProducerRecord<String, byte[]>(topic, partition, Integer.toString(i), record(i + ""));
             	 producer.send(message);
             }
+            log.info("send 100 message end ...");
             Thread.sleep(500);
         }
     }

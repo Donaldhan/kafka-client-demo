@@ -68,6 +68,10 @@ public class ProducerExample {
         	ProducerRecord<String, String> message = new ProducerRecord<String, String>(topic, partition, Long.toString(record), Long.toString(record++));
             producer.send(message);
         }
+        /**
+         * 可以不调用producer.flush()方法，因为上面我们已经定义生产者的batch.size属性，
+         * 当消息size累计到batch.size时，则生产者publish消息到kafka
+         */
 //        producer.flush();
         log.info("send message ended ...");
     }
