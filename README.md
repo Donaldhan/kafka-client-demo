@@ -54,7 +54,7 @@ Avro provides:
 details:http://avro.apache.org/docs/current/
 
 client.consumer package, has some kafka consumer client with all delivery guarantee mode,
-such as,At most once, At least one, and Exactly once
+such as,At most once, At least one, and Exactly once.
 
 under client.consumer.arvo package, the consumer is based on Apache arvo.
 
