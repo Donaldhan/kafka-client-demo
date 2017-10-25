@@ -1,2 +1,96 @@
 # kafka-client-demo
 test kafka client with java
+
+
+###########################kafka-clients#################################
+this project is reference the under project(kafka-clients) in github
+kafka-clients：https://github.com/ajmalbabu/kafka-clients/tree/master/src/main/java/poc
+and you can get start from the project blog, the url as follow:
+Kafka Clients (At-Most-Once, At-Least-Once, Exactly-Once, and Avro Client) ：
+https://dzone.com/articles/kafka-clients-at-most-once-at-least-once-exactly-o
+
+###########################Kafka delivery guarantee###################################
+Kafka delivery guarantee that could be provided   
+    At most once—Messages may be lost but are never redelivered.
+    At least once—Messages are never lost but may be redelivered.
+    Exactly once—this is what people actually want, each message is delivered once and only once.
+
+It's worth noting that this breaks down into two problems: the durability guarantees for publishing a message
+and the guarantees when consuming a message. 
+
+details:
+http://www.infoq.com/cn/articles/kafka-analysis-part-1/
+http://kafka.apache.org/documentation/#majordesignelements
+
+client package include kafka producer and consumer package;
+under producer package, has some producer client examples, 
+but be care the package client.producer.arvo, it uses binary byte to store message
+with apache avro into kafka topic. the apache avro introduce, see#src/main/resource/Apache-avro, simlply
+say,the apache avro is simmilary with thrift.
+Apache Avro™ is a data serialization system.
+Avro provides:
+    Rich data structures.
+    A compact, fast, binary data format.
+    A container file, to store persistent data.
+    Remote procedure call (RPC).
+    Simple integration with dynamic languages. Code generation is not required to read 
+or write data files nor to use or implement RPC protocols. Code generation as an optional optimization,
+only worth implementing for statically typed languages.
+details:http://avro.apache.org/docs/current/
+
+client.consumer package, has some kafka consumer client with all delivery guarantee mode,
+such as,At most once, At least one, and Exactly once
+
+under client.consumer.arvo package, the consumer is based on Apache arvo.
+
+client.offset.OffsetManager is use for store kafka topic partition offset, it will used 
+in Exactly once mode kafka consumer client.
+
+before you test this project producer and consumer client, you must start the kafka cluster or standy,
+you can reference under blog:http://donald-draper.iteye.com/blog/2397310
+the following command is running on kafka cluster with 3 broker(id:0,1,2)
+then need create topic,can use following command：
+
+[donald@Donald_Draper bin]$ ./kafka-topics.sh --zookeeper localhost:2181 --create --topic normal-topic --partitions 2 --replication-factor 3
+Created topic "normal-topic".
+[donald@Donald_Draper bin]$ 
+
+To check the status of the created topic, execute the following command from the Kafka installation folder:
+
+[donald@Donald_Draper bin]$ ./kafka-topics.sh --list --topic normal-topic --zookeeper localhost:2181
+normal-topic
+[donald@Donald_Draper bin]$ 
+
+[donald@Donald_Draper bin]$ ./kafka-topics.sh --describe --zookeeper localhost:2181 --topic normal-topic
+Topic:normal-topic      PartitionCount:2        ReplicationFactor:3     Configs:
+        Topic: normal-topic     Partition: 0    Leader: 1       Replicas: 1,2,0 Isr: 1,2,0
+        Topic: normal-topic     Partition: 1    Leader: 2       Replicas: 2,0,1 Isr: 2,0,1
+[donald@Donald_Draper bin]$   
+
+If the topic needs to be altered to increase the partition, execute the following command from the Kafka installation folder:
+
+./kafka-topics.sh --alter --topic normal-topic --zookeeper localhost:2181 --partitions 3
+
+in addition, need another topic use for test arvo producer and consumer, command as follow:
+
+[donald@Donald_Draper bin]$ ./kafka-topics.sh --zookeeper localhost:2181 --create --topic avro-topic --partitions 2 --replication-factor 3
+Created topic "avro-topic".
+[donald@Donald_Draper bin]$ ./kafka-topics.sh --describe --zookeeper localhost:2181 --topic avro-topic
+Topic:avro-topic        PartitionCount:2        ReplicationFactor:3     Configs:
+        Topic: avro-topic       Partition: 0    Leader: 0       Replicas: 0,2,1 Isr: 0,2,1
+        Topic: avro-topic       Partition: 1    Leader: 1       Replicas: 1,0,2 Isr: 1,0,2
+[donald@Donald_Draper bin]$ 
+
+now ,you can run Producer and Consumer client. During the running, if producer cann't produce message,
+or consumer cann't consume message, please check the broker servers config, topic name,and so on, 
+then open log4j control output with debug mode.
+
+PS:
+
+the offset-storage-static-consumer-normal-topic-0  file used to record the ExactlyOnceDynamicConsumer's offset,
+at the begin, it's not exist. if you want to test, you can delete the file or modify it'content to 0.
+the offset-storage-dynamic-consumer-normal-topic-0 file used to record the ExactlyOnceStaticConsumer's offset,
+at the begin, it's not exist. if you want to test, you can delete the file or modify it'content to 0.
+
+	
+
