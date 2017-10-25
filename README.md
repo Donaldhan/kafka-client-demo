@@ -21,10 +21,7 @@ Kafka delivery guarantee that could be provided
     
     At least once—Messages are never lost but may be redelivered.
     
-    Exactly once—this is what people actually want, each message is delivered once and only once.
-
-It's worth noting that this breaks down into two problems: the durability guarantees for publishing a message
-and the guarantees when consuming a message. 
+    Exactly once—this is what people actually want, each message is delivered once and only once.It's worth noting that this breaks down into two problems: the durability guarantees for publishing a message and the guarantees when consuming a message. 
 
 
 details:
@@ -52,8 +49,7 @@ Avro provides:
     
     Remote procedure call (RPC).
     
-    Simple integration with dynamic languages. Code generation is not required to read
-or write data files nor to use or implement RPC protocols. Code generation as an optional optimization,only worth implementing for statically typed languages.
+    Simple integration with dynamic languages. Code generation is not required to read or write data files nor to use or implement RPC protocols. Code generation as an optional optimization,only worth implementing for statically typed languages.
 
 details:http://avro.apache.org/docs/current/
 
